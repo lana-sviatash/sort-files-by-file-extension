@@ -1,8 +1,7 @@
+import sys
 import os
 from pathlib import Path
 import shutil
-import tkinter as tk
-import tkinter.filedialog as fd
 
 
 def normalize(name):
@@ -111,7 +110,7 @@ def print_results(files_by_type, file_types, unknown_types):
     print("-" * 50)
     
     for file_type, file_list in files_by_type.items():
-        file_names = [normalize(os.path.basename(name)) for name in file_list]
+        file_names = set(normalize(os.path.basename(name)) for name in file_list)
         if len(file_list) > 0: 
             print("{:<10} | {}".format(file_type, (", ".join(sorted(name for name in file_names)))))
     
@@ -121,13 +120,21 @@ def print_results(files_by_type, file_types, unknown_types):
         print("Unknown Extensions: {}".format(", ".join(sorted(unknown_types))))
     else:
         print("Unknown Extensions: None\n")
+    
 
+def main():
+    try:
+        folder_path = sys.argv[1]
+    except IndexError:
+        return 'Usage: python sort.py <folder_path>'
 
-if __name__ == '__main__':
-    root = tk.Tk()
-    root.geometry('200x150')
-    folder_path = fd.askdirectory(title='Select folder with folders and files for sorting')
+    if not Path(folder_path).exists():
+        return f'Folder with path {folder_path} does not exist'
 
     files_by_type, file_types, unknown_types = check_file_type(folder_path)
     print_results(files_by_type, file_types, unknown_types)
     move_to_folder(folder_path)
+
+
+if __name__ == '__main__':
+    main()
